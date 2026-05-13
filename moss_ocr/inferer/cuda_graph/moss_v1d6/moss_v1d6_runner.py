@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from transformers import AutoModel, AutoTokenizer, PreTrainedTokenizer
 from moss_ocr.inferer.cuda_graph.moss_v1d6.modeling_moss_v1d6 import MOSSv1d6VLModel, MOSSv1d6ImageAsPrefixVLModel
 from moss_ocr.inferer.cuda_graph.moss_v1d6.image_processing import ImageProcess, get_nearest_image_shape
-from moss_ocr.utils.utils import truncate_repetitions, chunk_list, to_numpy
+from moss_ocr.utils.utils import truncate_repetitions_fast_slice, chunk_list, to_numpy
 
 logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger(__name__)
@@ -153,7 +153,7 @@ class MOSSBasicRunner(ABC):
 
     def run_with_fallback(self, img, task, use_tqdm=False, nearest_n: int = 8) -> str:
         result = self.run(img, task, use_tqdm)
-        truncated_result = truncate_repetitions(result)
+        truncated_result = truncate_repetitions_fast_slice(result)
         if truncated_result == result:
             return result
         return self._run_with_fallback(img=img, task=task, use_tqdm=use_tqdm, nearest_n=nearest_n)
@@ -182,7 +182,7 @@ class MOSSBasicRunner(ABC):
 
     def run_batch_with_fallback(self, img_ls, task_ls, use_tqdm=False, nearest_n=8) -> list[str]:
         result = self.run_batch(img_ls, task_ls, use_tqdm)
-        truncated_result = [truncate_repetitions(r) for r in result]
+        truncated_result = [truncate_repetitions_fast_slice(r) for r in result]
         final_result = []
         for r, t, cur_img, cur_task in zip(result, truncated_result, img_ls, task_ls):
             if t == r:

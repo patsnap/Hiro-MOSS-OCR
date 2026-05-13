@@ -14,8 +14,11 @@ except ImportError as e:
 
 try:
     import flash_attn
+    HAS_FLASH_ATTN = True
 except ImportError as e:
     print(f"flash_attn is not installed, if you wanna using flash_attn, you should install it!")
+    HAS_FLASH_ATTN = False
+
 
 curdir = os.path.dirname(__file__)
 rtpath = os.path.join(curdir, "../../..")
@@ -660,18 +663,16 @@ class VisionTransformer(nn.Module):
             image_features: tensor of token features for all tokens of all images of
                 shape (N_toks, D)
         """
-        # # pass images through initial convolution independently
-        # x = self.patch_conv(x)  # bsz, C, H // patch_size, W // patch_size
-        # pos_mesh = position_meshgrid(x)  # positional embeddings
-        # pos_embed = self.rope_pos_embedding(pos_mesh).to(device=x.device)  # torch.complex
-        # if self.config.use_pre_norm:
-        #     x = self.ln_pre(x.flatten(2).transpose(1, 2).contiguous())  # (bsz, seq_len, dim)
-        # out = self.transformer(x, pos_embed=pos_embed)
-        # if self.config.use_post_norm:
-        #     x = self.ln_post(x)
-
-        # return out  # type: ignore[no-any-return]
-        return self.forward_packing([x])[0]
+        # pass images through initial convolution independently
+        x = self.patch_conv(x)  # bsz, C, H // patch_size, W // patch_size
+        pos_mesh = position_meshgrid(x)  # positional embeddings
+        pos_embed = self.rope_pos_embedding(pos_mesh).to(device=x.device)  # torch.complex
+        if self.config.use_pre_norm:
+            x = self.ln_pre(x.flatten(2).transpose(1, 2).contiguous())  # (bsz, seq_len, dim)
+        out = self.transformer(x, pos_embed=pos_embed)
+        if self.config.use_post_norm:
+            x = self.ln_post(x)
+        return out 
 
     def forward_packing_naive(
             self,
@@ -679,7 +680,7 @@ class VisionTransformer(nn.Module):
     ) -> list[torch.Tensor]:
         return [self(i) for i in x_ls]
 
-    def _forward_packing(
+    def _forward_packing_xformers(
             self,
             x_ls: list[torch.Tensor]
     ) -> list[torch.Tensor]:
@@ -707,6 +708,12 @@ class VisionTransformer(nn.Module):
         return packing_mask.split(out)  # list of (1, seq_len, d)
 
     def forward_packing(self, x_ls: list[torch.Tensor]) -> list[torch.Tensor]:
+        if HAS_FLASH_ATTN:
+            return self.forward_packing_flash_attn(x_ls)
+        else:
+            return self.forward_packing_naive(x_ls)
+    
+    def forward_packing_flash_attn(self, x_ls: list[torch.Tensor]) -> list[torch.Tensor]:
         # print(f" using flash_attn packing ")
         patch_embedding_ls = [self.patch_conv(x) for x in x_ls]  # shape: list[(1, d, H // patch_size, W // patch_size)]
         pos_mesh_packing = position_meshgrid_packing(patch_embedding_ls)  # positional embeddings

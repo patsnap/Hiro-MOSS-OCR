@@ -77,8 +77,6 @@ class MOSSv1d6VLModel(MOSSv1d6VLPreTrainedModel, GenerationMixin):
         math="read formula from image and output in Latex formula format: \n",
         table="read table from image and output in HTML format: \n",
         text="read text from image and output in Markdown format: \n",
-        page="read all text from image and output in Markdown format, ignore noise text, such as headers, footers, page numbers, etc. \n",
-        code="read code block from image and output in Markdown format: \n",
     )
     SUPPORT_COMPRESSOR_TYPE = (
         "identity",

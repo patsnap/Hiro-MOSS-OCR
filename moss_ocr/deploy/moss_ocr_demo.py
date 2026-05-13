@@ -8,6 +8,11 @@ from enum import Enum
 import gradio as gr
 import uuid
 
+from transformers import (
+    PPDocLayoutV3ForObjectDetection,
+    PPDocLayoutV3ImageProcessor,
+)
+
 import torch
 from PIL import Image
 from moss_ocr.inferer.cuda_graph.moss_v1d6.moss_v1d6_runner import MOSSv1d6Runner
@@ -219,7 +224,7 @@ class OCR4GrFrontend:
                 task_radio = gr.Radio(
                     label="任务选择",
                     choices=TaskType.supported_tasks(),
-                    value=TaskType.PAGE_OCR.value
+                    value=TaskType.TEXT_OCR.value
                 )
 
             with gr.Column():
@@ -261,11 +266,11 @@ class OCR4GrFrontend:
         )
 
     @classmethod
-    def ocr_hub_gr(cls, model_name: str = "moss_v1_0_3B_251201"):
+    def ocr_hub_gr(cls, model_name="MOSS-OCR"):
         with gr.Blocks(theme=gr.themes.Monochrome()) as hub_demo:
             gr.components.Markdown(
                 f"""
-                # 🍀OCR-Anything-VLLM ({model_name})
+                # 🍀 {model_name}
                 **MOSS**: **M**ultimodal **O**CR for **S**tructured Markup **S**equencing
                 """
             )
@@ -277,15 +282,16 @@ class OCR4GrFrontend:
 
 
 def main():
-    parser = argparse.ArgumentParser("OCR-Anything")
+    parser = argparse.ArgumentParser("MOSS-OCR-Demo")
+    parser.add_argument("--model_path", help="model path")
     parser.add_argument("--port", default=7788, type=int, help="web demo service port")
     parser.add_argument("--max_length", default=2048, type=int, help="generation max length")
     parser.add_argument("--max_batch_size", default=8, type=int, help="max batch size")
-    parser.add_argument("--model_name", default="moss_v1_0_3B_251201", choices=MODELHUB.keys(), type=str, help="model name")
+    
     args = parser.parse_args()
-    init_model(max_length=args.max_length, max_batch_size=args.max_batch_size, model_name=args.model_name)
+    init_model(max_length=args.max_length, max_batch_size=args.max_batch_size, model_path=args.model_path)
 
-    demo = OCR4GrFrontend().ocr_hub_gr(model_name=MODLE_COFNIG[args.model_name].model_name_display)
+    demo = OCR4GrFrontend().ocr_hub_gr(model_name="MOSS-OCR")
     demo.launch(
         server_name="0.0.0.0",
         server_port=args.port,

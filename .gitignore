@@ -1,3 +1,11 @@
+# Virtual environments
+.venv
+.DS_Store
+.vscode
+.idea
+.pytest_cache
+.cache/*
+
 # Python-generated files
 __pycache__/
 *.py[oc]
@@ -6,5 +14,3 @@ dist/
 wheels/
 *.egg-info
 
-# Virtual environments
-.venv
