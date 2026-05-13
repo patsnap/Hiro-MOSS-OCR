@@ -30,7 +30,38 @@ A multimodal OCR model for **block-level** layout understanding. It emits struct
 
 ### OmniDocBench v1.5 (with gold layout labels)
 
-*(Metrics to be added.)*
+| Model               | Param | TEDS  | CDM (Math) | Edit Similarity (Text) | Overall |
+|--------------------|-------|-------|------------|--------------------------|---------|
+| dolphin            | 0.3B  | 77.08 | 93.88      | 90.96                    | 87.31   |
+| Monkey OCR Pro 1.2B| 1.2B  | 83.89 | 94.31      | 93.07                    | 90.42   |
+| Mineru 2.5         | 1.2B  | 87.90 | 95.94      | 93.25                    | 92.36   |
+| Mineru 2.5 Pro     | 1.2B  | 92.46 | 97.24      | 93.98                    | 94.56   |
+| Paddle VL          | 0.9B  | 90.57 | 96.87      | 94.34                    | 93.93   |
+| Paddle VL 1.5      | 0.9B  | 90.79 | 97.28      | 94.56                    | 94.21   |
+| GLM-OCR            | 0.9B  | 93.71 | 97.74      | 96.44                    | 95.96   |
+| MOSS-OCR-0.3B      | 0.3B  | 90.35 | 95.33      | 95.18                    | 93.62   |
+
+### In-house Benchmark (Patent Domain)
+
+| Model               | Param | TEDS  | CDM (Math) | Overall |
+|--------------------|-------|-------|------------|---------|
+| dolphin            | 0.3B  | 75.97 | 94.36      | 85.17   |
+| Monkey OCR Pro 1.2B| 1.2B  | 78.39 | 93.01      | 85.70   |
+| Mineru 2.5         | 1.2B  | 84.27 | 95.28      | 89.78   |
+| Mineru 2.5 Pro     | 1.2B  | 87.97 | 96.56      | 92.27   |
+| Paddle VL          | 0.9B  | 85.27 | 94.85      | 90.06   |
+| Paddle VL 1.5      | 0.9B  | 81.76 | 94.72      | 88.24   |
+| GLM-OCR            | 0.9B  | 86.58 | 96.07      | 91.33   |
+| MOSS-OCR-0.3B      | 0.3B  | 91.67 | 95.74      | 93.71   |
+
+
+###  Inference Speed on a Single RTX 4090 (vLLM)
+
+| Model               | Param | QPS (it/s)  |
+|--------------------|-------|--------------|
+| Mineru 2.5         | 1.2B  | 29.49     | 
+| MOSS-OCR-0.3B      | 0.3B  | 58.77    | 
+
 
 ---
 
