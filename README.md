@@ -28,9 +28,9 @@ A multimodal OCR model for **block-level** layout understanding. It emits struct
 
 ## Benchmarks
 
-### OmniDocBench v1.5 (with gold layout labels)
+### OmniDocBench v1.5 (with ground-truth layout labels)
 
-| Model               | Param | TEDS  | CDM (Math) | Edit Similarity (Text) | Overall |
+| Model               | Param | Table(TEDS)  |  Math(CDM) | Text (Edit Similarity) | Overall |
 |--------------------|-------|-------|------------|--------------------------|---------|
 | dolphin            | 0.3B  | 77.08 | 93.88      | 90.96                    | 87.31   |
 | Monkey OCR Pro 1.2B| 1.2B  | 83.89 | 94.31      | 93.07                    | 90.42   |
@@ -43,7 +43,7 @@ A multimodal OCR model for **block-level** layout understanding. It emits struct
 
 ### In-house Benchmark (Patent Domain)
 
-| Model               | Param | TEDS  | CDM (Math) | Overall |
+| Model               | Param | Table (TEDS)  | CDM (Math) | Overall |
 |--------------------|-------|-------|------------|---------|
 | dolphin            | 0.3B  | 75.97 | 94.36      | 85.17   |
 | Monkey OCR Pro 1.2B| 1.2B  | 78.39 | 93.01      | 85.70   |
