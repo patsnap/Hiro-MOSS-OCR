@@ -68,7 +68,7 @@ class BaseVllmPipelineOpenAI(ABC):
         max_retry: int = 3,
         max_concurrent: int = 32,
         url: str | None = None,
-        api_key: str | None = None,
+        api_key: str | None = "EMPTY",
         timeout: int | None = None,
         detect_repeat: bool = True,
         logger=_logger,

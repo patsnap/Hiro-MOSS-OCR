@@ -73,6 +73,4 @@ class MOSSOCRvLLMRunner(BaseVllmPipelineOpenAI):
 
 class MOSSOCRv1d6vLLMRunner(MOSSOCRvLLMRunner):
     MODEL_NAME = "moss-v1d6-0.3b"
-    API_KEY = None
-    URL = None
     MAX_LENGTH = 2048
