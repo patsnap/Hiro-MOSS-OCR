@@ -67,7 +67,6 @@ class BaseVllmPipelineOpenAI(ABC):
         max_length: int | None = None,
         max_retry: int = 3,
         max_concurrent: int = 32,
-        max_concurrent_for_processing: int = 32,
         url: str | None = None,
         api_key: str | None = None,
         timeout: int | None = None,
@@ -83,8 +82,6 @@ class BaseVllmPipelineOpenAI(ABC):
         self.timeout = timeout
         self.max_retry = max_retry
         self.max_concurrent = max_concurrent
-        self.max_concurrent_for_processing = max_concurrent_for_processing
-        self.process_pool = ProcessPoolExecutor(max_workers=min(os.cpu_count() or 1, max_concurrent_for_processing))
 
         self.logger = logger or _logger
 
@@ -94,6 +91,7 @@ class BaseVllmPipelineOpenAI(ABC):
         self.detect_repeat = detect_repeat
         self._url_index = 0
         self._async_clients = []
+        self.ocr_sem = asyncio.Semaphore(max_concurrent)
 
     def _get_client(self) -> AsyncOpenAI:
         loop = asyncio.get_running_loop()
@@ -101,12 +99,20 @@ class BaseVllmPipelineOpenAI(ABC):
         if self._current_loop is not loop:
             self._current_loop = loop
             self._url_index = 0
+            old_client = self._http_client
             
             limits = httpx.Limits(
                 max_connections=self.max_concurrent + 10,
                 max_keepalive_connections=self.max_concurrent
             )
             self._http_client = httpx.AsyncClient(limits=limits, timeout=self.timeout)
+            
+            if old_client and getattr(old_client, "is_closed", False) is False:
+                try:
+                    loop.create_task(old_client.aclose())
+                except Exception as e:
+                    self.logger.warning(f"Failed to close old http client: {e}")
+
             if "[SEP]" not in self.url:
                 self._async_clients = [AsyncOpenAI(
                     base_url=self.url,
@@ -191,9 +197,9 @@ class BaseVllmPipelineOpenAI(ABC):
 
                     is_repeated = False
                     if self.detect_repeat and _result is not None and _finish_reason != "stop":
-                        loop = asyncio.get_running_loop()
+                        loop = asyncio.get_running_loop()   
                         _truncate_result = await loop.run_in_executor(
-                            self.process_pool, 
+                            None, 
                             truncate_repetitions_fast_slice,
                               _result
                         ) 
@@ -269,10 +275,9 @@ class BaseVllmPipelineOpenAI(ABC):
         return asyncio.run(self.async_run(img, task, max_length, **kwargs))
 
     async def async_run_batch(self, img_ls: list, task_ls: list, max_length_ls: list, **kwargs) -> list[OCRResult]:
-        sem = asyncio.Semaphore(self.max_concurrent)
 
         async def bounded_run(img, task, length):
-            async with sem:
+            async with self.ocr_sem:
                 return await self.async_run(img, task, max_length=length, **kwargs)
 
         tasks = [
@@ -310,10 +315,11 @@ class BaseVllmPipelineOpenAI(ABC):
         return asyncio.run(self.async_run_batch(img_ls, task_ls, max_length_ls, **kwargs))
 
     def close(self):
-        if hasattr(self, 'process_pool') and self.process_pool:
-            self.process_pool.shutdown(wait=False)
         if self._http_client and not self._http_client.is_closed:
-            pass
+            try:
+                asyncio.run(self._http_client.aclose())
+            except Exception:
+                pass
 
     def __del__(self):
         self.close()
@@ -325,8 +331,6 @@ class BaseVllmPipelineOpenAI(ABC):
         await self.aclose()
 
     async def aclose(self):
-        """异步关闭网络客户端和进程池"""
+        """close the http client"""
         if self._http_client and getattr(self._http_client, "is_closed", False) is False:
             await self._http_client.aclose()
-        if self.process_pool:
-            self.process_pool.shutdown(wait=False)
