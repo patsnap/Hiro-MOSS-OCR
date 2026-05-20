@@ -1,4 +1,4 @@
-# MOSS: Multimodal OCR for Structured Markup Sequencing
+# MOSS🍀: Multimodal OCR for Structured Markup Sequencing
 
 A multimodal OCR model for **block-level** layout understanding. It emits structured markup—math as LaTeX, tables as HTML, and body text as Markdown—with support for Japanese, Chinese, and English.
 
@@ -39,7 +39,7 @@ A multimodal OCR model for **block-level** layout understanding. It emits struct
 | Paddle VL          | 0.9B  | 90.57 | 96.87      | 94.34                    | 93.93   |
 | Paddle VL 1.5      | 0.9B  | 90.79 | 97.28      | 94.56                    | 94.21   |
 | GLM-OCR            | 0.9B  | 93.71 | 97.74      | 96.44                    | 95.96   |
-| MOSS-OCR-0.3B      | 0.3B  | 90.35 | 95.33      | 95.18                    | 93.62   |
+| MOSS-OCR-0.3B      | 0.3B  | 90.33 | 95.56      | 95.01                    | 93.63   |
 
 ### In-house Benchmark (Patent Domain)
 
@@ -52,7 +52,7 @@ A multimodal OCR model for **block-level** layout understanding. It emits struct
 | Paddle VL          | 0.9B  | 85.27 | 94.85      | 90.06   |
 | Paddle VL 1.5      | 0.9B  | 81.76 | 94.72      | 88.24   |
 | GLM-OCR            | 0.9B  | 86.58 | 96.07      | 91.33   |
-| MOSS-OCR-0.3B      | 0.3B  | 91.67 | 95.74      | 93.71   |
+| MOSS-OCR-0.3B      | 0.3B  | 91.64 | 95.34      | 93.49   |
 
 
 ###  Inference Speed on a Single RTX 4090 (vLLM)
