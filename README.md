@@ -91,6 +91,7 @@ cd MOSS-OCR
 
 uv python pin 3.12
 uv venv .venv
+source .venv/bin/activate
 uv sync
 
 # Copy MOSS patches into the installed vLLM package (run after uv sync)
