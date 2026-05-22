@@ -1,8 +1,12 @@
+
 # MOSS🍀: Multimodal OCR for Structured Markup Sequencing
 
 A multimodal OCR model for **block-level** layout understanding. It emits structured markup—math as LaTeX, tables as HTML, and body text as Markdown—with support for Japanese, Chinese, and English.
 
 ---
+
+github: https://github.com/patsnap/Hiro-MOSS-OCR
+
 
 ## Overview
 
@@ -77,7 +81,7 @@ A multimodal OCR model for **block-level** layout understanding. It emits struct
 
 | Model | Download | Precision |
 |-------|----------|-----------|
-| MOSS-OCR-0.3B | [Hugging Face — PatSnap/MOSS-OCR-0.3B](https://huggingface.co/PatSnap/MOSS-OCR-0.3B/tree/main) | FP32 / BF16 |
+| Hiro-MOSS-OCR-0.3B | [Hugging Face — PatSnap/Hiro-MOSS-OCR-0.3B](https://huggingface.co/PatSnap/Hiro-MOSS-OCR-0.3B) | FP32 / BF16 |
 
 Download the checkpoint to a local directory and point `MODEL_PATH` to it in the commands below.
 
@@ -86,8 +90,8 @@ Download the checkpoint to a local directory and point `MODEL_PATH` to it in the
 ## Install (from source)
 
 ```bash
-git clone https://github.com/patsnap/MOSS-OCR.git
-cd MOSS-OCR
+git clone https://github.com/patsnap/Hiro-MOSS-OCR
+cd Hiro-MOSS-OCR
 
 uv python pin 3.12
 uv venv .venv
@@ -111,7 +115,7 @@ Single-GPU local inference via Transformers and the CUDA Graph path.
 ```python
 from moss_ocr.inferer.cuda_graph import MOSSv1d6Runner
 
-model_path = "/path/to/MOSS-OCR-0.3B"
+model_path = "/path/to/Hiro-MOSS-OCR-0.3B"
 runner = MOSSv1d6Runner(model_path=model_path)
 
 img_path = "/path/to/your/image.png"
@@ -125,7 +129,7 @@ CLI (same as the bundled example):
 
 ```bash
 uv run python moss_ocr/examples/run_with_cuda_graph.py \
-  --model_path /path/to/MOSS-OCR-0.3B \
+  --model_path /path/to/Hiro-MOSS-OCR-0.3B \
   --task text \
   --img_path /path/to/your/image.png
 ```
@@ -139,7 +143,7 @@ uv run python moss_ocr/examples/run_with_cuda_graph.py \
 Set `MODEL_PATH` to your local Hugging Face checkout:
 
 ```bash
-export MODEL_PATH=/path/to/MOSS-OCR-0.3B
+export MODEL_PATH=/path/to/Hiro-MOSS-OCR-0.3B
 
 uv run vllm serve "$MODEL_PATH" \
   --max-model-len 4096 \
