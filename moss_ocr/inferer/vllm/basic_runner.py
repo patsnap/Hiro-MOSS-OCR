@@ -1,7 +1,6 @@
 import os
 import logging
 import re
-from tkinter.constants import E
 import cv2
 import weakref
 import threading
