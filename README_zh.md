@@ -1,4 +1,4 @@
-# MOSS：面向结构化标记序列的多模态 OCR
+# MOSS🍀：面向结构化标记序列的多模态 OCR
 
 [English](README.md) | [简体中文](README_zh.md)
 

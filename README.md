@@ -1,4 +1,4 @@
-# MOSS: Multimodal OCR for Structured Markup Sequencing
+# MOSS🍀: Multimodal OCR for Structured Markup Sequencing
 
 [English](README.md) | [简体中文](README_zh.md)
 
