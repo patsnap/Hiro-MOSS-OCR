@@ -289,7 +289,7 @@ def main():
     demo = OCR4GrFrontend().ocr_hub_gr(model_name="MOSS-OCR")
     demo.launch(
         server_port=args.port,
-        debug=True,
+        debug=False,
         allowed_paths=[rtpath, curdir]
     )
 

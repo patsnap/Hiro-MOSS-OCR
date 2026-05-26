@@ -140,7 +140,7 @@ def array_to_bytes(x: np.ndarray) -> bytes:
         bytes
     """
     np_bytes = BytesIO()
-    np.save(np_bytes, x, allow_pickle=True)
+    np.save(np_bytes, x, allow_pickle=False)
     return np_bytes.getvalue()
 
 
@@ -152,7 +152,7 @@ def bytes_to_array(b: bytes) -> np.ndarray:
         np.ndarray
     """
     np_bytes = BytesIO(b)
-    return np.load(np_bytes, allow_pickle=True)
+    return np.load(np_bytes, allow_pickle=False)
 
 
 def str2hashint(text, digit = 16) -> int:
@@ -346,7 +346,7 @@ def load_yaml_config(file_path):
     """
     _, ext = os.path.splitext(file_path)
     assert ext in ['.yml', '.yaml'], "only support yaml files for now"
-    global_config = yaml.load(open(file_path, 'rb'), Loader=yaml.Loader)
+    global_config = yaml.safe_load(open(file_path, 'rb'), Loader=yaml.Loader)
     return global_config
 
 
