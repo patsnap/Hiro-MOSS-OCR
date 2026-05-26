@@ -8,11 +8,6 @@ from enum import Enum
 import gradio as gr
 import uuid
 
-from transformers import (
-    PPDocLayoutV3ForObjectDetection,
-    PPDocLayoutV3ImageProcessor,
-)
-
 import torch
 from PIL import Image
 from moss_ocr.inferer.cuda_graph.moss_v1d6.moss_v1d6_runner import MOSSv1d6Runner
@@ -293,7 +288,6 @@ def main():
 
     demo = OCR4GrFrontend().ocr_hub_gr(model_name="MOSS-OCR")
     demo.launch(
-        server_name="0.0.0.0",
         server_port=args.port,
         debug=True,
         allowed_paths=[rtpath, curdir]
