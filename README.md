@@ -29,6 +29,10 @@ github: https://github.com/patsnap/Hiro-MOSS-OCR
 **Languages:** JP, CN, EN.
 
 ---
+## Related Documents
+
+- [Disclaimer](docs/DISCLAIMER.md) — Terms of use, limitations of liability, and data-handling responsibilities
+---
 
 ## Benchmarks
 
