@@ -219,6 +219,14 @@ uv run python moss_ocr/examples/run_with_vllm.py \
 
 ---
 
+## 版权声明
+
+Copyright (c) 2026 Patsnap. 除非适用许可条款明确授权，保留所有权利。
+
+Hiro-MOSS-OCR、Patsnap 以及任何相关名称、徽标、产品名称、服务名称、设计和标语均为 Patsnap 或其关联公司的商标或注册商标。除非明确说明，开源许可证或任何模型许可证均不授予任何商标许可。
+
+---
+
 ## 致谢
 
 - [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)

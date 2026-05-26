@@ -219,6 +219,14 @@ The default `--served-model-name` should match the client's model name, `moss-v1
 
 ---
 
+## Copyright Notice
+
+Copyright (c) 2026 Patsnap. All rights reserved except as expressly licensed under the applicable license terms.
+
+Hiro-MOSS-OCR, Patsnap, and any associated names, logos, product names, service names, designs, and slogans are trademarks or registered trademarks of Patsnap or its affiliates. No trademark license is granted under the open source license or any model license unless expressly stated.
+
+---
+
 ## Acknowledgements
 
 - [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
