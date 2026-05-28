@@ -471,14 +471,34 @@ class ImageProcess:
                 return np.stack(img_ls) if info_ls[0] is None else (np.stack(img_ls), info_ls)
 
     @classmethod
-    def from_pretrained(cls, pretrained_model_name_or_path: str) -> "ImageProcess":
+    def from_pretrained(cls, pretrained_model_name_or_path: str, **kwargs) -> "ImageProcess":
+        subfolder = kwargs.get("subfolder")
         if os.path.isfile(pretrained_model_name_or_path):
             config_file = pretrained_model_name_or_path
+        elif os.path.isdir(pretrained_model_name_or_path):
+            config_dir = os.path.join(pretrained_model_name_or_path, subfolder) if subfolder else pretrained_model_name_or_path
+            config_file = os.path.join(config_dir, "img_processor.json")
         else:
-            config_file = os.path.join(pretrained_model_name_or_path, "img_processor.json")
-        assert os.path.exists(config_file), f"{config_file} does not exist!"
+            from transformers.utils import cached_file
+
+            cache_kwargs = {
+                key: kwargs[key]
+                for key in (
+                    "cache_dir",
+                    "force_download",
+                    "local_files_only",
+                    "revision",
+                    "subfolder",
+                    "token",
+                )
+                if key in kwargs and kwargs[key] is not None
+            }
+            if "use_auth_token" in kwargs and "token" not in cache_kwargs:
+                cache_kwargs["token"] = kwargs["use_auth_token"]
+            config_file = cached_file(pretrained_model_name_or_path, "img_processor.json", **cache_kwargs)
+        assert config_file is not None and os.path.exists(config_file), f"{config_file} does not exist!"
         with open(config_file, 'r', encoding="utf-8", errors="ignore") as f:
-            config = json.load(f, strict=config_file)
+            config = json.load(f, strict=True)
         return cls(**config)
 
 

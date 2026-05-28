@@ -143,7 +143,34 @@ bash scripts/vllm_adapter.sh
 
 ## 使用方式
 
-### 1. 使用 CUDA Graph + Transformers 本地推理
+### 1. 快速调用（Transformers `AutoModelForCausalLM`）
+
+如果只是想快速验证模型，可以直接通过 Hugging Face Transformers 加载并调用：
+
+> 这个方式实现简单，但推理效率相对较慢，适合快速试用、功能验证或小规模单张图片调用。生产服务、高吞吐或批量推理建议使用下面的 CUDA Graph 或 vLLM 方式。
+
+```python
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # 可选：必须在 import torch 前设置
+
+import torch
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained(
+    "PatSnap/Hiro-MOSS-OCR-0.3B",
+    trust_remote_code=True,
+    dtype=torch.bfloat16,
+    device_map="auto",
+)
+
+img_path = "/path/to/your/image.png"
+task = "text"  # "math" | "table" | "text"
+
+texts = model.generate(img_path, task=task)
+print(texts[0])
+```
+
+### 2. 使用 CUDA Graph + Transformers 本地推理
 
 可以使用 `MOSSv1d6Runner` 进行单进程本地推理：
 
@@ -169,7 +196,7 @@ uv run python moss_ocr/examples/run_with_cuda_graph.py \
   --img_path /path/to/your/image.png
 ```
 
-### 2. 使用 vLLM 服务和 OpenAI 兼容客户端
+### 3. 使用 vLLM 服务和 OpenAI 兼容客户端
 
 首先使用 Hugging Face repo id 或本地 checkpoint 启动 vLLM：
 

@@ -143,7 +143,34 @@ bash scripts/vllm_adapter.sh
 
 ## Usage
 
-### 1. Local Inference with CUDA Graph + Transformers
+### 1. Quick Call with Transformers `AutoModelForCausalLM`
+
+For a quick smoke test, load and call the model directly with Hugging Face Transformers:
+
+> This path is simple but relatively slow. Use it for quick trials, functional checks, or small single-image calls. For production serving, higher throughput, or batch inference, prefer the CUDA Graph or vLLM paths below.
+
+```python
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # Optional; set before importing torch.
+
+import torch
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained(
+    "PatSnap/Hiro-MOSS-OCR-0.3B",
+    trust_remote_code=True,
+    dtype=torch.bfloat16,
+    device_map="auto",
+)
+
+img_path = "/path/to/your/image.png"
+task = "text"  # "math" | "table" | "text"
+
+texts = model.generate(img_path, task=task)
+print(texts[0])
+```
+
+### 2. Local Inference with CUDA Graph + Transformers
 
 Use `MOSSv1d6Runner` for single-process local inference:
 
@@ -169,7 +196,7 @@ uv run python moss_ocr/examples/run_with_cuda_graph.py \
   --img_path /path/to/your/image.png
 ```
 
-### 2. vLLM Server with an OpenAI-compatible Client
+### 3. vLLM Server with an OpenAI-compatible Client
 
 First, start vLLM with either the Hugging Face repo id or a local model
 checkpoint:
