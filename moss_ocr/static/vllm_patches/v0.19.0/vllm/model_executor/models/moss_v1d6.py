@@ -14,6 +14,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 from transformers import BatchFeature
+from transformers.utils import cached_file
 
 from vllm.compilation.decorators import support_torch_compile
 from vllm.config import CacheConfig, VllmConfig
@@ -67,6 +68,85 @@ from .utils import (
 )
 from transformers import AutoTokenizer
 from vllm.transformers_utils.configs.moss_v1d6 import MOSSv1d6Config, MOSSv1d6VisionConfig
+
+
+def _get_model_config_attr(model_config: object, name: str) -> object | None:
+    return getattr(model_config, name, None)
+
+
+def _get_hf_config_commit_hash(hf_config: object | None) -> str | None:
+    if hf_config is None:
+        return None
+    commit_hash = getattr(hf_config, "_commit_hash", None)
+    return commit_hash or None
+
+
+def _resolve_img_processor_file(
+    pretrained_model_name_or_path: str,
+    *,
+    cache_dir: str | None = None,
+    revision: str | None = None,
+    token: bool | str | None = None,
+    local_files_only: bool | None = None,
+) -> str:
+    model_path = os.fspath(pretrained_model_name_or_path)
+    if os.path.isfile(model_path):
+        return model_path
+
+    local_config_file = os.path.join(model_path, "img_processor.json")
+    if os.path.exists(local_config_file):
+        return local_config_file
+
+    cached_file_kwargs = {
+        "cache_dir": cache_dir,
+        "revision": revision,
+        "token": token,
+        "local_files_only": local_files_only,
+        "_raise_exceptions_for_missing_entries": False,
+    }
+    cached_file_kwargs = {
+        key: value for key, value in cached_file_kwargs.items()
+        if value is not None
+    }
+    try:
+        config_file = cached_file(
+            model_path,
+            "img_processor.json",
+            **cached_file_kwargs,
+        )
+    except Exception as exc:
+        raise FileNotFoundError(
+            f"Could not resolve img_processor.json from "
+            f"{pretrained_model_name_or_path!r}"
+        ) from exc
+
+    if config_file is None:
+        raise FileNotFoundError(
+            f"Could not find img_processor.json in "
+            f"{pretrained_model_name_or_path!r}"
+        )
+    return config_file
+
+
+def _resolve_img_processor_file_from_model_config(
+    model_config: object,
+    hf_config: object | None = None,
+) -> str:
+    model_path = _get_model_config_attr(model_config, "model")
+    if model_path is None:
+        raise ValueError("model_config.model is required to resolve img_processor.json")
+    revision = (
+        _get_hf_config_commit_hash(hf_config)
+        or _get_model_config_attr(model_config, "revision")
+    )
+    return _resolve_img_processor_file(
+        os.fspath(model_path),
+        cache_dir=_get_model_config_attr(model_config, "download_dir"),
+        revision=revision,
+        token=_get_model_config_attr(model_config, "hf_token"),
+        local_files_only=_get_model_config_attr(model_config, "local_files_only"),
+    )
+
 
 # ---------------------------------------------------------------------------
 # TensorSchema helpers
@@ -467,11 +547,7 @@ class ImageProcessPacking:
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path: str) -> "ImageProcessPacking":
-        if os.path.isfile(pretrained_model_name_or_path):
-            config_file = pretrained_model_name_or_path
-        else:
-            config_file = os.path.join(pretrained_model_name_or_path, "img_processor.json")
-        assert os.path.exists(config_file), f"{config_file} does not exist!"
+        config_file = _resolve_img_processor_file(pretrained_model_name_or_path)
         with open(config_file, 'r', encoding="utf-8", errors="ignore") as f:
             config = json.load(f, strict=config_file)
         return cls(**config)
@@ -693,8 +769,11 @@ class MOSSv1d6HFProcessorAdapter:
 
     def _get_img_processor(self) -> ImageProcessPacking:
         if self._img_processor is None:
-            model_path = self._info.ctx.model_config.model
-            self._img_processor = ImageProcessPacking.from_pretrained(model_path)
+            config_file = _resolve_img_processor_file_from_model_config(
+                self._info.ctx.model_config,
+                self._info.get_hf_config(),
+            )
+            self._img_processor = ImageProcessPacking.from_pretrained(config_file)
         return self._img_processor
 
     def _to_pixel_values(self, images: object) -> dict[str, object]:
@@ -748,10 +827,11 @@ class MOSSv1d6ProcessingInfo(BaseProcessingInfo):
     def _align_size(self, h: int, w: int) -> tuple[int, int]:
         """Compute post-resize dimensions matching ImageProcessPacking logic."""
 
-        model_path = self.ctx.model_config.model
-        
         if getattr(self, "_ip_cfg", None) is None:
-            ip_path = os.path.join(model_path, "img_processor.json")
+            ip_path = _resolve_img_processor_file_from_model_config(
+                self.ctx.model_config,
+                self.get_hf_config(),
+            )
             with open(ip_path) as f:
                 self._ip_cfg = json.load(f)
 
@@ -1813,4 +1893,3 @@ class MOSSv1d6VLForConditionalGeneration(nn.Module, SupportsMultiModal, Supports
     ) -> set[str]:
         loader = AutoWeightsLoader(self)
         return loader.load_weights(weights, mapper=self.hf_to_vllm_mapper)
-

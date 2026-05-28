@@ -171,10 +171,12 @@ uv run python moss_ocr/examples/run_with_cuda_graph.py \
 
 ### 2. vLLM Server with an OpenAI-compatible Client
 
-First, start vLLM with your local model checkpoint:
+First, start vLLM with either the Hugging Face repo id or a local model
+checkpoint:
 
 ```bash
-export MODEL_PATH=/path/to/Hiro-MOSS-OCR-0.3B
+export MODEL_PATH=PatSnap/Hiro-MOSS-OCR-0.3B
+# Or: export MODEL_PATH=/path/to/Hiro-MOSS-OCR-0.3B
 
 uv run vllm serve "$MODEL_PATH" \
   --max-model-len 4096 \
