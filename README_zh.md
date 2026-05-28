@@ -13,6 +13,8 @@ MOSS 是一个基于 **50M+ 训练数据从零训练**、面向块级文档理�
 <details>
 <summary>近期更新</summary>
 
+- **2026-05-28** - CUDA Graph 和 vLLM 推理现已支持直接解析 Hugging Face Hub repo id，可直接使用 `PatSnap/Hiro-MOSS-OCR-0.3B`，无需先手动下载 checkpoint。
+- **2026-05-28** - 新增 Transformers `AutoModelForCausalLM` 快速调用方式，适合快速验证；该方式使用方便，但推理效率低于 CUDA Graph 和 vLLM 后端。
 - **2026-05-26** - Hiro-MOSS-OCR-0.3B 已在 [Hugging Face](https://huggingface.co/PatSnap/Hiro-MOSS-OCR-0.3B) 开放。
 - **2026-05-26** - 仓库已提供本地 CUDA Graph 推理和 vLLM 服务部署示例。
 
@@ -26,7 +28,7 @@ MOSS 是一个基于 **50M+ 训练数据从零训练**、面向块级文档理�
 - **结构化输出：** 支持公式识别、表格还原和正文抽取，并为不同任务生成对应的标记格式。
 - **模型轻量：** 总参数量约 **320.8M**。
 - **支持任意分辨率图像：** 基于 NaViT 风格视觉编码，并使用 2D RoPE。
-- **两种推理方式：** 支持本地 Transformers/CUDA Graph 推理，也支持通过 vLLM 部署为 OpenAI 兼容服务。
+- **多种推理方式：** 支持 Transformers 快速调用、本地 CUDA Graph 推理，也支持通过 vLLM 部署为 OpenAI 兼容服务。
 
 ---
 
@@ -116,7 +118,7 @@ MOSS 是一个基于 **50M+ 训练数据从零训练**、面向块级文档理�
 |------|----------|------|
 | Hiro-MOSS-OCR-0.3B | [PatSnap/Hiro-MOSS-OCR-0.3B](https://huggingface.co/PatSnap/Hiro-MOSS-OCR-0.3B) | FP32 / BF16 |
 
-请先将 checkpoint 下载到本地目录，然后在下面的命令中将该目录作为 `MODEL_PATH` 使用。
+可以直接使用 Hugging Face repo id `PatSnap/Hiro-MOSS-OCR-0.3B`，也可以将 checkpoint 下载到本地目录用于离线部署。下面的 CUDA Graph 和 vLLM 示例都支持将这两种形式作为 `MODEL_PATH`。
 
 ---
 
@@ -147,26 +149,28 @@ bash scripts/vllm_adapter.sh
 
 如果只是想快速验证模型，可以直接通过 Hugging Face Transformers 加载并调用：
 
-> 这个方式实现简单，但推理效率相对较慢，适合快速试用、功能验证或小规模单张图片调用。生产服务、高吞吐或批量推理建议使用下面的 CUDA Graph 或 vLLM 方式。
+> 这个方式实现简单，但推理效率相对较慢，适合快速试用、功能验证或小规模单张图片调用。生产服务、高吞吐或批量推理建议使用下面的 CUDA Graph 或 vLLM 方式。快速调用建议放在单张 GPU 上运行，不建议依赖自动多卡拆分。
 
 ```python
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # 可选：必须在 import torch 前设置
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")  # 必须在 import torch 前设置
 
 import torch
 from transformers import AutoModelForCausalLM
 
-model = AutoModelForCausalLM.from_pretrained(
-    "PatSnap/Hiro-MOSS-OCR-0.3B",
-    trust_remote_code=True,
-    dtype=torch.bfloat16,
-    device_map="auto",
-)
-
+model_id = "PatSnap/Hiro-MOSS-OCR-0.3B"
 img_path = "/path/to/your/image.png"
 task = "text"  # "math" | "table" | "text"
 
-texts = model.generate(img_path, task=task)
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    trust_remote_code=True,
+    dtype=torch.bfloat16,
+    device_map={"": 0},
+).eval()
+
+with torch.inference_mode():
+    texts = model.generate(img_path, task=task)
 print(texts[0])
 ```
 
@@ -177,7 +181,8 @@ print(texts[0])
 ```python
 from moss_ocr.inferer.cuda_graph import MOSSv1d6Runner
 
-model_path = "/path/to/Hiro-MOSS-OCR-0.3B"
+model_path = "PatSnap/Hiro-MOSS-OCR-0.3B"
+# 或：model_path = "/path/to/Hiro-MOSS-OCR-0.3B"
 runner = MOSSv1d6Runner(model_path=model_path)
 
 img_path = "/path/to/your/image.png"
@@ -191,7 +196,7 @@ print(output)
 
 ```bash
 uv run python moss_ocr/examples/run_with_cuda_graph.py \
-  --model_path /path/to/Hiro-MOSS-OCR-0.3B \
+  --model_path PatSnap/Hiro-MOSS-OCR-0.3B \
   --task text \
   --img_path /path/to/your/image.png
 ```
@@ -201,6 +206,7 @@ uv run python moss_ocr/examples/run_with_cuda_graph.py \
 首先使用 Hugging Face repo id 或本地 checkpoint 启动 vLLM：
 
 ```bash
+# 请先确认当前环境中已经运行过 `bash scripts/vllm_adapter.sh`。
 export MODEL_PATH=PatSnap/Hiro-MOSS-OCR-0.3B
 # 或：export MODEL_PATH=/path/to/Hiro-MOSS-OCR-0.3B
 

@@ -13,6 +13,8 @@ Repository: [github.com/patsnap/Hiro-MOSS-OCR](https://github.com/patsnap/Hiro-M
 <details>
 <summary>Recent updates</summary>
 
+- **2026-05-28** - CUDA Graph and vLLM inference can now resolve the Hugging Face Hub repo id directly, so `PatSnap/Hiro-MOSS-OCR-0.3B` works without manually downloading the checkpoint first.
+- **2026-05-28** - Added a Transformers `AutoModelForCausalLM` quick-call path for smoke tests. This path is convenient but slower than the CUDA Graph and vLLM backends.
 - **2026-05-26** - Hiro-MOSS-OCR-0.3B is available on [Hugging Face](https://huggingface.co/PatSnap/Hiro-MOSS-OCR-0.3B).
 - **2026-05-26** - The repository includes both local CUDA Graph inference and vLLM serving examples.
 
@@ -26,7 +28,7 @@ Repository: [github.com/patsnap/Hiro-MOSS-OCR](https://github.com/patsnap/Hiro-M
 - **Structured outputs:** formula recognition, table reconstruction, and text extraction in task-specific markup formats.
 - **Compact model size:** about **320.8M** parameters.
 - **Any-resolution image support:** NaViT-style visual encoding with 2D RoPE.
-- **Two inference paths:** local Transformers/CUDA Graph inference and vLLM serving with an OpenAI-compatible client.
+- **Multiple inference paths:** Transformers quick calls, local CUDA Graph inference, and vLLM serving with an OpenAI-compatible client.
 
 ---
 
@@ -116,7 +118,7 @@ See [pyproject.toml](pyproject.toml) for pinned runtime dependencies.
 |-------|----------|-----------|
 | Hiro-MOSS-OCR-0.3B | [PatSnap/Hiro-MOSS-OCR-0.3B](https://huggingface.co/PatSnap/Hiro-MOSS-OCR-0.3B) | FP32 / BF16 |
 
-Download the checkpoint to a local directory, then use that directory as `MODEL_PATH` in the commands below.
+Use the Hugging Face repo id `PatSnap/Hiro-MOSS-OCR-0.3B` directly, or download the checkpoint to a local directory for offline deployments. The CUDA Graph and vLLM examples below accept either form as `MODEL_PATH`.
 
 ---
 
@@ -147,26 +149,28 @@ bash scripts/vllm_adapter.sh
 
 For a quick smoke test, load and call the model directly with Hugging Face Transformers:
 
-> This path is simple but relatively slow. Use it for quick trials, functional checks, or small single-image calls. For production serving, higher throughput, or batch inference, prefer the CUDA Graph or vLLM paths below.
+> This path is simple but relatively slow. Use it for quick trials, functional checks, or small single-image calls. For production serving, higher throughput, or batch inference, prefer the CUDA Graph or vLLM paths below. Keep the quick path on one GPU; it is not optimized for automatic multi-GPU module splitting.
 
 ```python
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # Optional; set before importing torch.
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")  # Set before importing torch.
 
 import torch
 from transformers import AutoModelForCausalLM
 
-model = AutoModelForCausalLM.from_pretrained(
-    "PatSnap/Hiro-MOSS-OCR-0.3B",
-    trust_remote_code=True,
-    dtype=torch.bfloat16,
-    device_map="auto",
-)
-
+model_id = "PatSnap/Hiro-MOSS-OCR-0.3B"
 img_path = "/path/to/your/image.png"
 task = "text"  # "math" | "table" | "text"
 
-texts = model.generate(img_path, task=task)
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    trust_remote_code=True,
+    dtype=torch.bfloat16,
+    device_map={"": 0},
+).eval()
+
+with torch.inference_mode():
+    texts = model.generate(img_path, task=task)
 print(texts[0])
 ```
 
@@ -177,7 +181,8 @@ Use `MOSSv1d6Runner` for single-process local inference:
 ```python
 from moss_ocr.inferer.cuda_graph import MOSSv1d6Runner
 
-model_path = "/path/to/Hiro-MOSS-OCR-0.3B"
+model_path = "PatSnap/Hiro-MOSS-OCR-0.3B"
+# Or: model_path = "/path/to/Hiro-MOSS-OCR-0.3B"
 runner = MOSSv1d6Runner(model_path=model_path)
 
 img_path = "/path/to/your/image.png"
@@ -191,7 +196,7 @@ The same path is available through the bundled example:
 
 ```bash
 uv run python moss_ocr/examples/run_with_cuda_graph.py \
-  --model_path /path/to/Hiro-MOSS-OCR-0.3B \
+  --model_path PatSnap/Hiro-MOSS-OCR-0.3B \
   --task text \
   --img_path /path/to/your/image.png
 ```
@@ -202,6 +207,7 @@ First, start vLLM with either the Hugging Face repo id or a local model
 checkpoint:
 
 ```bash
+# Make sure `bash scripts/vllm_adapter.sh` has been run in this environment.
 export MODEL_PATH=PatSnap/Hiro-MOSS-OCR-0.3B
 # Or: export MODEL_PATH=/path/to/Hiro-MOSS-OCR-0.3B
 
