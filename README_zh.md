@@ -243,6 +243,20 @@ uv run python moss_ocr/examples/run_with_vllm.py \
 
 默认的 `--served-model-name` 应与客户端模型名 `moss-v1d6-0.3b` 保持一致。如果你修改了服务端名称，请在构造 `MOSSOCRv1d6vLLMRunner` 时传入 `model_path="<your-served-name>"`。
 
+### 4. Web Demo
+
+Gradio Web Demo 会在 demo 进程内使用本地 CUDA Graph 后端。`--model_path` 可以传入 Hugging Face repo id，也可以传入本地 checkpoint 路径：
+
+```bash
+uv run python moss_ocr/deploy/moss_ocr_demo.py \
+  --model_path PatSnap/Hiro-MOSS-OCR-0.3B \
+  --port 7788
+```
+
+启动后打开 [http://127.0.0.1:7788](http://127.0.0.1:7788)。你可以上传图片，在任务选择中切换公式、表格或段落文本 OCR，也可以展开 **Examples** 加载仓库内置的示例图片；示例图片位于 `moss_ocr/static/img_examples/`。
+
+如果需要生成更长结果，可以调大 `--max_length`；如需调整本地批处理上限，可以设置 `--max_batch_size`。
+
 ---
 
 ## 注意事项

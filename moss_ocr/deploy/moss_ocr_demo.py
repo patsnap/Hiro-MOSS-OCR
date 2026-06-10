@@ -16,7 +16,9 @@ from moss_ocr.utils.utils import Timer, get_all_file_path, checkdir
 from moss_ocr.utils.draw_operation import DrawImage
 
 curdir = os.path.dirname(__file__)
-rtpath = os.path.abspath(os.path.join(curdir, "../.."))
+pkgdir = os.path.abspath(os.path.join(curdir, ".."))
+rtpath = os.path.abspath(os.path.join(pkgdir, ".."))
+img_examples_dir = os.path.join(pkgdir, "static", "img_examples")
 gradio_tmp_dir = os.path.join(rtpath, ".cache", "gradio")
 checkdir([gradio_tmp_dir])
 os.environ['GRADIO_TEMP_DIR'] = gradio_tmp_dir
@@ -28,9 +30,9 @@ logger = logging.getLogger(__name__)
 
 
 class TaskType(Enum):
-    MATH_OCR = "公式OCR"
-    TABLE_OCR = "表格OCR"
-    TEXT_OCR = "段落文本OCR"
+    MATH_OCR = "Formula OCR"
+    TABLE_OCR = "Table OCR"
+    TEXT_OCR = "Text OCR"
 
 
     @classmethod
@@ -40,11 +42,16 @@ class TaskType(Enum):
 
 class Example4Gr:
 
+    @staticmethod
+    def _example_paths(task_dir: str, task: str) -> list[list[str]]:
+        task_example_dir = os.path.join(img_examples_dir, task_dir)
+        return [[i, task] for i in sorted(get_all_file_path(task_example_dir))[:2]]
+
     @classmethod
     def vllm_example(cls, img_gr: gr.components.Component, task_gr: gr.components.Component) -> gr.Examples:
-        mathocr_example_ls = [[i, TaskType.MATH_OCR.value] for i in get_all_file_path(os.path.join(rtpath, "static/img_examples/math"))[:2]]
-        table_example_ls = [[i, TaskType.TABLE_OCR.value] for i in get_all_file_path(os.path.join(rtpath, "static/img_examples/table"))[:2]]
-        text_example_ls = [[i, TaskType.TEXT_OCR.value] for i in get_all_file_path(os.path.join(rtpath, "static/img_examples/text"))[:2]]
+        mathocr_example_ls = cls._example_paths("math", TaskType.MATH_OCR.value)
+        table_example_ls = cls._example_paths("table", TaskType.TABLE_OCR.value)
+        text_example_ls = cls._example_paths("text", TaskType.TEXT_OCR.value)
 
         total_example = mathocr_example_ls + table_example_ls + text_example_ls 
         return gr.Examples(
@@ -213,17 +220,17 @@ class OCR4GrFrontend:
             with gr.Column():
                 with gr.Tab("Image"):
                     upload_vllm_image = gr.Image(
-                        label='待识别图片', type="numpy", image_mode='RGB', elem_id="upload_vllm_image"
+                        label="Input Image", type="numpy", image_mode='RGB', elem_id="upload_vllm_image"
                     )
 
                 task_radio = gr.Radio(
-                    label="任务选择",
+                    label="Task",
                     choices=TaskType.supported_tasks(),
                     value=TaskType.TEXT_OCR.value
                 )
 
             with gr.Column():
-                with gr.Tab(label="Markdown渲染结果"):
+                with gr.Tab(label="Rendered Markdown"):
                     vllm_markdown_result = gr.Markdown(
                         label="vllm_markdown_result",
                         elem_id="vllm_markdown_result",
@@ -234,7 +241,7 @@ class OCR4GrFrontend:
                             {"left": r"\(", "right": r"\)", "display": False}
                         ]
                     )
-                with gr.Tab(label="原始文本"):
+                with gr.Tab(label="Raw Text"):
                     vllm_markdown_source_result = gr.Textbox(
                         label="vllm_markdown_source_result",
                         elem_id="vllm_markdown_source_result",
@@ -245,9 +252,9 @@ class OCR4GrFrontend:
 
         with gr.Row():
             vllm_submit_btn = gr.Button("Submit", elem_id="vllm_submit_btn")
-        vllm_time_info = gr.HTML(label="耗时统计", elem_id="vllm_time_info", show_label=True)
+        vllm_time_info = gr.HTML(label="Timing", elem_id="vllm_time_info", show_label=True)
 
-        with gr.Accordion(label="展开查看Examples", elem_id="vllm_examples", open=False):
+        with gr.Accordion(label="Examples", elem_id="vllm_examples", open=False):
             Example4Gr.vllm_example(upload_vllm_image, task_radio)
 
         vllm_submit_btn.click(
@@ -270,7 +277,7 @@ class OCR4GrFrontend:
                 """
             )
             #
-            with gr.Tab("多模态 OCR"):
+            with gr.Tab("Multimodal OCR"):
                 cls.doc_vllm_gr()
 
         return hub_demo
@@ -290,7 +297,7 @@ def main():
     demo.launch(
         server_port=args.port,
         debug=False,
-        allowed_paths=[rtpath, curdir]
+        allowed_paths=[rtpath, curdir, img_examples_dir]
     )
 
 

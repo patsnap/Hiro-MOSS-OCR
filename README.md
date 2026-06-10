@@ -244,6 +244,20 @@ uv run python moss_ocr/examples/run_with_vllm.py \
 
 The default `--served-model-name` should match the client's model name, `moss-v1d6-0.3b`. If you change the served name, pass `model_path="<your-served-name>"` when constructing `MOSSOCRv1d6vLLMRunner`.
 
+### 4. Web Demo
+
+The Gradio web demo runs the local CUDA Graph backend in the demo process. It accepts either the Hugging Face repo id or a local checkpoint path as `--model_path`:
+
+```bash
+uv run python moss_ocr/deploy/moss_ocr_demo.py \
+  --model_path PatSnap/Hiro-MOSS-OCR-0.3B \
+  --port 7788
+```
+
+Then open [http://127.0.0.1:7788](http://127.0.0.1:7788). You can upload an image, choose formula, table, or text OCR from the task selector, or expand **Examples** to load the bundled sample images from `moss_ocr/static/img_examples/`.
+
+For longer generations, increase `--max_length`; for larger local batches, adjust `--max_batch_size`.
+
 ---
 
 ## Notes
