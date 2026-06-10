@@ -174,6 +174,15 @@ with torch.inference_mode():
 print(texts[0])
 ```
 
+也可以直接运行仓库内置示例：
+
+```bash
+uv run python moss_ocr/examples/run_with_transformers.py \
+  --model_path PatSnap/Hiro-MOSS-OCR-0.3B \
+  --task text \
+  --img_path /path/to/your/image.png
+```
+
 ### 2. 使用 CUDA Graph + Transformers 本地推理
 
 可以使用 `MOSSv1d6Runner` 进行单进程本地推理：
@@ -250,10 +259,11 @@ Gradio Web Demo 会在 demo 进程内使用本地 CUDA Graph 后端。`--model_p
 ```bash
 uv run python moss_ocr/deploy/moss_ocr_demo.py \
   --model_path PatSnap/Hiro-MOSS-OCR-0.3B \
+  --host 0.0.0.0 \
   --port 7788
 ```
 
-启动后打开 [http://127.0.0.1:7788](http://127.0.0.1:7788)。你可以上传图片，在任务选择中切换公式、表格或段落文本 OCR，也可以展开 **Examples** 加载仓库内置的示例图片；示例图片位于 `moss_ocr/static/img_examples/`。
+启动后打开 [http://127.0.0.1:7788](http://127.0.0.1:7788)；如果绑定到 `0.0.0.0`，也可以直接访问服务器 IP。你可以上传图片，在任务选择中切换公式、表格或段落文本 OCR，也可以展开 **Examples** 加载仓库内置的示例图片；示例图片位于 `moss_ocr/static/img_examples/`。
 
 如果需要生成更长结果，可以调大 `--max_length`；如需调整本地批处理上限，可以设置 `--max_batch_size`。
 

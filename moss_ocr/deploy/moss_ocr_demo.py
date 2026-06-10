@@ -286,6 +286,7 @@ class OCR4GrFrontend:
 def main():
     parser = argparse.ArgumentParser("MOSS-OCR-Demo")
     parser.add_argument("--model_path", help="model path")
+    parser.add_argument("--host", default=None, help="web demo service host")
     parser.add_argument("--port", default=7788, type=int, help="web demo service port")
     parser.add_argument("--max_length", default=2048, type=int, help="generation max length")
     parser.add_argument("--max_batch_size", default=8, type=int, help="max batch size")
@@ -295,6 +296,7 @@ def main():
 
     demo = OCR4GrFrontend().ocr_hub_gr(model_name="MOSS-OCR")
     demo.launch(
+        server_name=args.host,
         server_port=args.port,
         debug=False,
         allowed_paths=[rtpath, curdir, img_examples_dir]

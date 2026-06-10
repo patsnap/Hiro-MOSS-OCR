@@ -174,6 +174,15 @@ with torch.inference_mode():
 print(texts[0])
 ```
 
+The same quick path is available through the bundled example:
+
+```bash
+uv run python moss_ocr/examples/run_with_transformers.py \
+  --model_path PatSnap/Hiro-MOSS-OCR-0.3B \
+  --task text \
+  --img_path /path/to/your/image.png
+```
+
 ### 2. Local Inference with CUDA Graph + Transformers
 
 Use `MOSSv1d6Runner` for single-process local inference:
@@ -251,10 +260,11 @@ The Gradio web demo runs the local CUDA Graph backend in the demo process. It ac
 ```bash
 uv run python moss_ocr/deploy/moss_ocr_demo.py \
   --model_path PatSnap/Hiro-MOSS-OCR-0.3B \
+  --host 0.0.0.0 \
   --port 7788
 ```
 
-Then open [http://127.0.0.1:7788](http://127.0.0.1:7788). You can upload an image, choose formula, table, or text OCR from the task selector, or expand **Examples** to load the bundled sample images from `moss_ocr/static/img_examples/`.
+Then open [http://127.0.0.1:7788](http://127.0.0.1:7788), or visit the server IP directly when binding to `0.0.0.0`. You can upload an image, choose formula, table, or text OCR from the task selector, or expand **Examples** to load the bundled sample images from `moss_ocr/static/img_examples/`.
 
 For longer generations, increase `--max_length`; for larger local batches, adjust `--max_batch_size`.
 
