@@ -245,7 +245,7 @@ CLI 示例：
 
 ```bash
 uv run python moss_ocr/examples/run_with_vllm.py \
-  --url http://127.0.0.1:8088/v1 \
+  --url http://0.0.0.0:8088/v1 \
   --task text \
   --img_path /path/to/your/image.png
 ```
