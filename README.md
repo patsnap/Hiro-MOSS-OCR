@@ -233,7 +233,7 @@ Then call the server with `MOSSOCRv1d6vLLMRunner`. The `url` must include the `/
 ```python
 from moss_ocr.inferer.vllm import MOSSOCRv1d6vLLMRunner
 
-runner = MOSSOCRv1d6vLLMRunner(url="http://127.0.0.1:8088/v1")
+runner = MOSSOCRv1d6vLLMRunner(url="http://0.0.0.0:8088/v1")
 
 img_path = "/path/to/your/image.png"
 task = "text"  # "math" | "table" | "text"
