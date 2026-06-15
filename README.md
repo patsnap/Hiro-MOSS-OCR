@@ -1,12 +1,18 @@
+<div align="center">
+
 # MOSS🍀: Multimodal OCR for Structured Markup Sequencing
 
 [English](README.md) | [简体中文](README_zh.md)
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
+[![OCR Model Github](https://img.shields.io/badge/github-MOSS--OCR-blue?logo=github)](https://github.com/patsnap/Hiro-MOSS-OCR)
+[![OCR Model Huggingface](https://img.shields.io/badge/🤗%20Model-MOSS--OCR-yellow.svg)](https://huggingface.co/PatSnap/Hiro-MOSS-OCR-0.3B)
+
+
 MOSS is a multimodal OCR model **trained from scratch on 50M+ samples** for block-level document understanding. It converts document image regions into structured markup, including LaTeX for formulas, HTML for tables, and Markdown for body text. The model supports Japanese, Chinese, and English.
 
-Repository: [github.com/patsnap/Hiro-MOSS-OCR](https://github.com/patsnap/Hiro-MOSS-OCR)
-
----
+</div>
 
 ## News and Updates
 

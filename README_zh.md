@@ -1,12 +1,17 @@
+<div align="center">
+
 # MOSS🍀：面向结构化标记序列的多模态 OCR
 
 [English](README.md) | [简体中文](README_zh.md)
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
+[![OCR Model Github](https://img.shields.io/badge/github-MOSS--OCR-blue?logo=github)](https://github.com/patsnap/Hiro-MOSS-OCR)
+[![OCR Model Huggingface](https://img.shields.io/badge/🤗%20Model-MOSS--OCR-yellow.svg)](https://huggingface.co/PatSnap/Hiro-MOSS-OCR-0.3B)
+
 MOSS 是一个基于 **50M+ 训练数据从零训练**、面向块级文档理解的多模态 OCR 模型。它可以将文档图像区域转换为结构化标记：公式输出为 LaTeX，表格输出为 HTML，正文输出为 Markdown。模型支持日文、中文和英文。
 
-项目地址：[github.com/patsnap/Hiro-MOSS-OCR](https://github.com/patsnap/Hiro-MOSS-OCR)
-
----
+</div>
 
 ## 新闻与更新
 
