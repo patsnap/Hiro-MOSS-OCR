@@ -18,6 +18,7 @@ MOSS 是一个基于 **50M+ 训练数据从零训练**、面向块级文档理�
 <details>
 <summary>近期更新</summary>
 
+- **2026-07-02** - 新增 OmniDocBench v1.6 评测结果，采用真实版面标注和官方归一化规则。
 - **2026-05-28** - CUDA Graph 和 vLLM 推理现已支持直接解析 Hugging Face Hub repo id，可直接使用 `PatSnap/Hiro-MOSS-OCR-0.3B`，无需先手动下载 checkpoint。
 - **2026-05-28** - 新增 Transformers `AutoModelForCausalLM` 快速调用方式，适合快速验证；该方式使用方便，但推理效率低于 CUDA Graph 和 vLLM 后端。
 - **2026-05-26** - Hiro-MOSS-OCR-0.3B 已在 [Hugging Face](https://huggingface.co/PatSnap/Hiro-MOSS-OCR-0.3B) 开放。
@@ -82,6 +83,21 @@ MOSS 是一个基于 **50M+ 训练数据从零训练**、面向块级文档理�
 | Paddle VL 1.5 | 0.9B | 90.79 | 97.28 | 94.56 | 94.21 |
 | GLM-OCR | 0.9B | 93.71 | 97.74 | 96.44 | 95.96 |
 | MOSS-OCR-0.3B | 0.3B | 90.33 | 95.56 | 95.01 | 93.63 |
+
+### OmniDocBench v1.6
+
+使用真实版面标注和官方归一化规则进行评测。
+
+| 模型 | 参数量 | Table (TEDS) | Math (CDM) | Text (Edit Similarity) | Overall |
+|------|--------|--------------|------------|-------------------------|---------|
+| dolphin | 0.3B | 76.54 | 89.52 | 95.94 | 87.33 |
+| Monkey OCR Pro 1.2B | 1.2B | 82.95 | 95.80 | 97.11 | 91.95 |
+| Mineru 2.5 | 1.2B | 88.41 | 97.44 | 97.53 | 94.46 |
+| Mineru 2.5 Pro | 1.2B | 93.31 | 97.50 | 98.26 | 96.36 |
+| Paddle VL | 0.9B | 90.52 | 96.97 | 98.29 | 95.26 |
+| Paddle VL 1.5 | 0.9B | 92.04 | 96.48 | 98.32 | 95.61 |
+| GLM-OCR | 0.9B | 92.06 | 97.62 | 98.57 | 96.08 |
+| MOSS-OCR-0.3B | 0.3B | 89.92 | 95.66 | 97.80 | 94.46 |
 
 ### 内部专利领域评测
 

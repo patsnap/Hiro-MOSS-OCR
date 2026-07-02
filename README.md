@@ -19,6 +19,7 @@ MOSS is a multimodal OCR model **trained from scratch on 50M+ samples** for bloc
 <details>
 <summary>Recent updates</summary>
 
+- **2026-07-02** - Added OmniDocBench v1.6 benchmark results evaluated with ground-truth layout labels and official normalization.
 - **2026-05-28** - CUDA Graph and vLLM inference can now resolve the Hugging Face Hub repo id directly, so `PatSnap/Hiro-MOSS-OCR-0.3B` works without manually downloading the checkpoint first.
 - **2026-05-28** - Added a Transformers `AutoModelForCausalLM` quick-call path for smoke tests. This path is convenient but slower than the CUDA Graph and vLLM backends.
 - **2026-05-26** - Hiro-MOSS-OCR-0.3B is available on [Hugging Face](https://huggingface.co/PatSnap/Hiro-MOSS-OCR-0.3B).
@@ -83,6 +84,21 @@ Evaluation with ground-truth layout labels.
 | Paddle VL 1.5 | 0.9B | 90.79 | 97.28 | 94.56 | 94.21 |
 | GLM-OCR | 0.9B | 93.71 | 97.74 | 96.44 | 95.96 |
 | MOSS-OCR-0.3B | 0.3B | 90.33 | 95.56 | 95.01 | 93.63 |
+
+### OmniDocBench v1.6
+
+Evaluation with ground-truth layout labels and official normalization.
+
+| Model | Params | Table (TEDS) | Math (CDM) | Text (Edit Similarity) | Overall |
+|-------|--------|--------------|------------|-------------------------|---------|
+| dolphin | 0.3B | 76.54 | 89.52 | 95.94 | 87.33 |
+| Monkey OCR Pro 1.2B | 1.2B | 82.95 | 95.80 | 97.11 | 91.95 |
+| Mineru 2.5 | 1.2B | 88.41 | 97.44 | 97.53 | 94.46 |
+| Mineru 2.5 Pro | 1.2B | 93.31 | 97.50 | 98.26 | 96.36 |
+| Paddle VL | 0.9B | 90.52 | 96.97 | 98.29 | 95.26 |
+| Paddle VL 1.5 | 0.9B | 92.04 | 96.48 | 98.32 | 95.61 |
+| GLM-OCR | 0.9B | 92.06 | 97.62 | 98.57 | 96.08 |
+| MOSS-OCR-0.3B | 0.3B | 89.92 | 95.66 | 97.80 | 94.46 |
 
 ### In-house Patent-domain Benchmark
 
