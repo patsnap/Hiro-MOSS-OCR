@@ -8,6 +8,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
 [![OCR Model Github](https://img.shields.io/badge/github-MOSS--OCR-blue?logo=github)](https://github.com/patsnap/Hiro-MOSS-OCR)
 [![OCR Model Huggingface](https://img.shields.io/badge/🤗%20Model-MOSS--OCR-yellow.svg)](https://huggingface.co/PatSnap/Hiro-MOSS-OCR-0.3B)
+[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Spaces-Hiro--SmartDoc-purple.svg)](https://huggingface.co/spaces/PatSnap/Hiro-SmartDoc)
 
 MOSS 是一个基于 **50M+ 训练数据从零训练**、面向块级文档理解的多模态 OCR 模型。它可以将文档图像区域转换为结构化标记：公式输出为 LaTeX，表格输出为 HTML，正文输出为 Markdown。模型支持日文、中文和英文。
 
